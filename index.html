@@ -56,6 +56,8 @@ button{font:inherit;color:inherit}
 .seg input:checked+span{background:var(--seg-on);color:var(--on-accent);box-shadow:0 2px 6px -2px rgba(14,138,151,.6)}
 .seg input:focus-visible+span{outline:2px solid var(--accent)}
 .seg.big span{padding:10px 4px;font-size:15px}
+.seg.tall span{white-space:normal;line-height:1.2;padding:8px 4px;font-size:13.5px}
+.seg.tall em{display:block;font-style:normal;font-weight:500;font-size:11.5px;opacity:.75;margin-top:2px}
 .seg.big{background:var(--surface);border:1px solid var(--line)}
 .seg.big input:checked+span{background:var(--g-idle);color:var(--on-accent);box-shadow:0 4px 12px -4px rgba(47,111,228,.6)}
 
@@ -128,8 +130,8 @@ td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabula
   </header>
 
   <div class="seg big" role="radiogroup" aria-label="Tanı yolu">
-    <label><input type="radio" name="mode" id="mMri" value="2019" checked><span>MR var</span></label>
-    <label><input type="radio" name="mode" id="mNoMri" value="2012"><span>MR yok</span></label>
+    <label><input type="radio" name="mode" id="mNoMri" value="2012" checked><span>MR yok</span></label>
+    <label><input type="radio" name="mode" id="mMri" value="2019"><span>MR var</span></label>
   </div>
 
   <section class="result" id="result" aria-live="polite">
@@ -148,19 +150,19 @@ td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabula
     </div>
 
     <!-- MR var: Briganti 2019 -->
-    <div class="item" data-m="2019">
-      <span class="lbl" id="l-stage">MR'de evre</span>
-      <div class="seg" role="radiogroup" aria-labelledby="l-stage">
-        <label><input type="radio" name="stage" value="oc"><span>Sınırlı</span></label>
-        <label><input type="radio" name="stage" value="epe"><span>EPE</span></label>
-        <label><input type="radio" name="stage" value="svi"><span>SVİ</span></label>
+    <div class="item" data-m="2019" hidden>
+      <span class="lbl" id="l-stage">MR'de evre<small>MR raporundaki en ileri bulgu</small></span>
+      <div class="seg tall" role="radiogroup" aria-labelledby="l-stage">
+        <label><input type="radio" name="stage" value="oc"><span>Organa sınırlı<em>cT2</em></span></label>
+        <label><input type="radio" name="stage" value="epe"><span>Kapsül dışı<em>EPE · cT3a</em></span></label>
+        <label><input type="radio" name="stage" value="svi"><span>Seminal vezikül<em>SVİ · cT3b</em></span></label>
       </div>
     </div>
-    <div class="item inline" data-m="2019">
+    <div class="item inline" data-m="2019" hidden>
       <label class="lbl" for="diam">İndeks lezyon çapı</label>
       <div class="numin"><input id="diam" type="number" inputmode="numeric" min="1" max="80" step="1" placeholder="0"><span>mm</span></div>
     </div>
-    <div class="item" data-m="2019">
+    <div class="item" data-m="2019" hidden>
       <span class="lbl" id="l-gg">Hedefli biyopsi ISUP</span>
       <div class="seg" role="radiogroup" aria-labelledby="l-gg">
         <label><input type="radio" name="gg" value="2"><span>1–2</span></label>
@@ -168,7 +170,7 @@ td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabula
         <label><input type="radio" name="gg" value="4"><span>4–5</span></label>
       </div>
     </div>
-    <div class="item inline" data-m="2019">
+    <div class="item inline" data-m="2019" hidden>
       <span class="lbl">Sistematik kor<small>ISUP ≥2 olan / toplam</small></span>
       <div class="cores">
         <div class="numin"><input id="cPos" type="number" inputmode="numeric" min="0" max="40" step="1" aria-label="ISUP 2 ve üzeri kor" placeholder="0"></div>
@@ -178,7 +180,7 @@ td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabula
     </div>
 
     <!-- MR yok: Briganti 2012 -->
-    <div class="item" data-m="2012" hidden>
+    <div class="item" data-m="2012">
       <span class="lbl" id="l-ct">Klinik evre (DRM)</span>
       <div class="seg" role="radiogroup" aria-labelledby="l-ct">
         <label><input type="radio" name="cT" value="t1"><span>T1c</span></label>
@@ -186,7 +188,7 @@ td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabula
         <label><input type="radio" name="cT" value="t3"><span>T3</span></label>
       </div>
     </div>
-    <div class="item" data-m="2012" hidden>
+    <div class="item" data-m="2012">
       <span class="lbl">Biyopsi Gleason</span>
       <div class="pair">
         <div><small>Primer</small>
@@ -201,7 +203,7 @@ td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabula
           </div></div>
       </div>
     </div>
-    <div class="item inline" data-m="2012" hidden>
+    <div class="item inline" data-m="2012">
       <span class="lbl">Pozitif kor<small>kanserli / toplam</small></span>
       <div class="cores">
         <div class="numin"><input id="bPos" type="number" inputmode="numeric" min="0" max="40" step="1" aria-label="Kanser içeren kor" placeholder="0"></div>
@@ -221,15 +223,15 @@ td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabula
     <div>
       <h3>Hangi model</h3>
       <ul>
-        <li><b>MR var:</b> Briganti 2019. mpMR + hedefli + sistematik biyopsi. ePLND eşiği <b>%7</b>.</li>
         <li><b>MR yok:</b> Briganti 2012. Yalnızca sistematik biyopsi. ePLND eşiği <b>%5</b>.</li>
+        <li><b>MR var:</b> Briganti 2019. mpMR + hedefli + sistematik biyopsi. ePLND eşiği <b>%7</b>.</li>
         <li>cN0 cM0, klinik olarak lokalize hastalık içindir. PSMA PET ile evrelenmiş hastalar için geçerli değildir.</li>
       </ul>
     </div>
     <div>
       <h3>Girdiler</h3>
       <ul>
-        <li>EPE ve SVİ birlikteyse SVİ seçin.</li>
+        <li>MR evresi: rapordaki en ileri bulguyu seçin; EPE ve SVİ birlikteyse "Seminal vezikül".</li>
         <li>MR var: kor oranına yalnızca sistematik korlar girer, ISUP ≥2 olanlar sayılır.</li>
         <li>MR yok: herhangi bir derecede kanser içeren tüm korlar sayılır.</li>
       </ul>
@@ -254,7 +256,7 @@ td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabula
    Her değişiklikte version ve reviewed alanlarını güncelleyin.
    ===================================================================== */
 const MODEL_CONFIG = {
-  version: "2.1.0",
+  version: "2.2.0",
   reviewed: "2026-11-03",
   m2019: {
     name: "Briganti 2019",
