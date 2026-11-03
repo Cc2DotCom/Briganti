@@ -41,6 +41,7 @@ button{font:inherit;color:inherit}
 .seg input:focus-visible+span{outline:2px solid var(--accent)}
 .seg.big span{padding:10px 4px;font-size:15px}
 .seg.tall span{white-space:normal;line-height:1.2;padding:8px 4px;font-size:13.5px}
+.seg.grid{display:grid;grid-template-columns:repeat(4,1fr)}
 .seg.tall em{display:block;font-style:normal;font-weight:500;font-size:11.5px;opacity:.75;margin-top:2px}
 .seg.big{background:var(--surface);border:1px solid var(--line)}
 .seg.big input:checked+span{background:var(--g-idle);color:var(--on-accent);box-shadow:0 4px 12px -4px rgba(47,111,228,.6)}
@@ -67,6 +68,9 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .list{background:var(--surface);border-radius:18px;border:0;box-shadow:0 6px 18px -12px rgba(16,48,58,.4);overflow:hidden}
 .item{display:flex;flex-direction:column;gap:8px;padding:12px 16px;border-top:1px solid var(--line)}
 .item:first-child{border-top:0}
+.item{transition:box-shadow .2s,background .2s}
+.item.need{box-shadow:inset 4px 0 0 var(--warn);background:#fff8ef}
+.item.need .lbl{color:var(--warn)}
 .item.inline{flex-direction:row;align-items:center;justify-content:space-between;gap:12px}
 .lbl{font-size:15px;font-weight:600}
 .lbl small{display:block;font-weight:400;font-size:12.5px;color:var(--muted);margin-top:1px}
@@ -127,13 +131,13 @@ td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabula
   </section>
 
   <form class="list" id="form" novalidate autocomplete="off">
-    <div class="item inline">
+    <div class="item inline" id="it-psa">
       <label class="lbl" for="psa">PSA</label>
       <div class="numin"><input id="psa" type="number" inputmode="decimal" min="0" max="500" step="0.1" placeholder="0,0"><span>ng/mL</span></div>
     </div>
 
     <!-- MR var: Briganti 2019 -->
-    <div class="item" data-m="2019" hidden>
+    <div class="item" id="it-stage" data-m="2019" hidden>
       <span class="lbl" id="l-stage">MR'de evre<small>MR raporundaki en ileri bulgu</small></span>
       <div class="seg tall" role="radiogroup" aria-labelledby="l-stage">
         <label><input type="radio" name="stage" value="oc"><span>Organa sınırlı<em>cT2</em></span></label>
@@ -141,19 +145,19 @@ td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabula
         <label><input type="radio" name="stage" value="svi"><span>Seminal vezikül<em>SVİ · cT3b</em></span></label>
       </div>
     </div>
-    <div class="item inline" data-m="2019" hidden>
+    <div class="item inline" id="it-diam" data-m="2019" hidden>
       <label class="lbl" for="diam">İndeks lezyon çapı<small>En yüksek PI-RADS'lı lezyonun en büyük çapı</small></label>
       <div class="numin"><input id="diam" type="number" inputmode="numeric" min="1" max="80" step="1" placeholder="0"><span>mm</span></div>
     </div>
-    <div class="item" data-m="2019" hidden>
+    <div class="item" id="it-gg" data-m="2019" hidden>
       <span class="lbl" id="l-gg">Hedefli biyopsi ISUP</span>
-      <div class="seg" role="radiogroup" aria-labelledby="l-gg">
-        <label><input type="radio" name="gg" value="2"><span>1–2</span></label>
-        <label><input type="radio" name="gg" value="3"><span>3</span></label>
-        <label><input type="radio" name="gg" value="4"><span>4–5</span></label>
+      <div class="seg tall" role="radiogroup" aria-labelledby="l-gg">
+        <label><input type="radio" name="gg" value="2"><span>ISUP 1–2<em>3+3 · 3+4</em></span></label>
+        <label><input type="radio" name="gg" value="3"><span>ISUP 3<em>4+3</em></span></label>
+        <label><input type="radio" name="gg" value="4"><span>ISUP 4–5<em>Gleason 8–10</em></span></label>
       </div>
     </div>
-    <div class="item inline" data-m="2019" hidden>
+    <div class="item inline" id="it-c19" data-m="2019" hidden>
       <span class="lbl">Sistematik kor<small>ISUP ≥2 olan / toplam</small></span>
       <div class="cores">
         <div class="numin"><input id="cPos" type="number" inputmode="numeric" min="0" max="40" step="1" aria-label="ISUP 2 ve üzeri kor" placeholder="0"></div>
@@ -163,7 +167,7 @@ td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabula
     </div>
 
     <!-- MR yok: Briganti 2012 -->
-    <div class="item" data-m="2012">
+    <div class="item" id="it-ct" data-m="2012">
       <span class="lbl" id="l-ct">Klinik evre (DRM)</span>
       <div class="seg" role="radiogroup" aria-labelledby="l-ct">
         <label><input type="radio" name="cT" value="t1"><span>T1c</span></label>
@@ -171,22 +175,19 @@ td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabula
         <label><input type="radio" name="cT" value="t3"><span>T3</span></label>
       </div>
     </div>
-    <div class="item" data-m="2012">
-      <span class="lbl">Biyopsi Gleason</span>
-      <div class="pair">
-        <div><small>Primer</small>
-          <div class="seg" role="radiogroup" aria-label="Primer Gleason">
-            <label><input type="radio" name="gp" value="3"><span>≤3</span></label>
-            <label><input type="radio" name="gp" value="4"><span>≥4</span></label>
-          </div></div>
-        <div><small>Sekonder</small>
-          <div class="seg" role="radiogroup" aria-label="Sekonder Gleason">
-            <label><input type="radio" name="gs" value="3"><span>≤3</span></label>
-            <label><input type="radio" name="gs" value="4"><span>≥4</span></label>
-          </div></div>
+    <div class="item" id="it-gl" data-m="2012">
+      <span class="lbl" id="l-gl">Biyopsi Gleason<small>En yüksek dereceli kordaki skor</small></span>
+      <div class="seg tall grid" role="radiogroup" aria-labelledby="l-gl">
+        <label><input type="radio" name="gl" value="3,3"><span>3+3<em>ISUP 1</em></span></label>
+        <label><input type="radio" name="gl" value="3,4"><span>3+4<em>ISUP 2</em></span></label>
+        <label><input type="radio" name="gl" value="4,3"><span>4+3<em>ISUP 3</em></span></label>
+        <label><input type="radio" name="gl" value="4,4"><span>4+4<em>ISUP 4</em></span></label>
+        <label><input type="radio" name="gl" value="3,4b"><span>3+5<em>ISUP 4</em></span></label>
+        <label><input type="radio" name="gl" value="4,3b"><span>5+3<em>ISUP 4</em></span></label>
+        <label><input type="radio" name="gl" value="4,4b"><span>9–10<em>ISUP 5</em></span></label>
       </div>
     </div>
-    <div class="item inline" data-m="2012">
+    <div class="item inline" id="it-c12" data-m="2012">
       <span class="lbl">Pozitif kor<small>kanserli / toplam</small></span>
       <div class="cores">
         <div class="numin"><input id="bPos" type="number" inputmode="numeric" min="0" max="40" step="1" aria-label="Kanser içeren kor" placeholder="0"></div>
@@ -240,7 +241,7 @@ td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabula
    Her değişiklikte version ve reviewed alanlarını güncelleyin.
    ===================================================================== */
 const MODEL_CONFIG = {
-  version: "2.2.1",
+  version: "2.3.0",
   reviewed: "2026-11-03",
   m2019: {
     name: "Briganti 2019",
@@ -314,8 +315,8 @@ function gather(md){
     pos = num("cPos"); tot = num("cTot");
   } else {
     x.cT = radio("cT"); if (!x.cT) miss.push("klinik evre");
-    const p = radio("gp"), s = radio("gs"); x.gp = p?Number(p):null; x.gs = s?Number(s):null;
-    if (!p || !s) miss.push("Gleason");
+    const gl = radio("gl");
+    if (gl){ x.gp = Number(gl[0]); x.gs = Number(gl[2]); } else { x.gp = x.gs = null; miss.push("Gleason"); }
     pos = num("bPos"); tot = num("bTot");
   }
   if (pos===null || tot===null) miss.push("kor sayısı");
@@ -323,6 +324,14 @@ function gather(md){
   else if (pos>tot) bad.push("Pozitif kor toplamdan fazla");
   else x.pct = pos/tot*100;
   return {x, miss, bad};
+}
+
+const ROW = {"PSA":"it-psa","MR evresi":"it-stage","lezyon çapı":"it-diam","ISUP":"it-gg","klinik evre":"it-ct","Gleason":"it-gl"};
+let touched = false;
+function markMissing(md, miss){
+  document.querySelectorAll(".item.need").forEach(e=>e.classList.remove("need"));
+  if (!touched) return;
+  miss.forEach(k=>{ const id = k==="kor sayısı" ? (md==="2019"?"it-c19":"it-c12") : ROW[k]; if (id) $(id).classList.add("need"); });
 }
 
 function render(){
@@ -333,12 +342,13 @@ function render(){
   $("tick").style.left = `calc(${T/SCALE*100}% - 1px)`;
   $("modelCap").textContent = `${m.name} · eşik %${T}`;
   const {x, miss, bad} = gather(md);
+  markMissing(md, miss);
   const pill = $("pill"), bar = $("bar");
   if (miss.length || bad.length){
     $("riskNum").innerHTML = "–<small>%</small>";
     $("fill").style.width = "0"; bar.className = "bar"; $("result").className = "result";
     pill.className = "pill"; pill.textContent = bad.length ? "Değeri kontrol edin" : "Değerleri girin";
-    $("missCap").textContent = bad.length ? bad[0] : (miss.length <= 2 ? "Eksik: " + miss.join(", ") : "");
+    $("missCap").textContent = bad.length ? bad[0] : (touched ? "Eksik: " + miss.join(", ") : "");
     $("breakdown").tBodies[0].innerHTML = `<tr><td colspan="4">Değerler girildiğinde görünür.</td></tr>`;
     return;
   }
@@ -363,14 +373,14 @@ function init(){
   const c = MODEL_CONFIG;
   $("srcList").innerHTML = c.sources.map(s=>`<li><a href="${s.u}" target="_blank" rel="noopener">${s.t}</a></li>`).join("");
   $("ver").textContent = `Sürüm ${c.version} · Son kılavuz kontrolü ${c.reviewed}`;
-  document.addEventListener("input", render);
+  document.addEventListener("input", e=>{ if (e.target.name!=="mode") touched = true; render(); });
   document.addEventListener("change", render);
   $("form").addEventListener("submit", e=>e.preventDefault());
   $("infoBtn").addEventListener("click", ()=>openSheet(true));
   $("closeBtn").addEventListener("click", ()=>openSheet(false));
   $("sheet").addEventListener("click", e=>{ if (e.target.id==="sheet") openSheet(false); });
   document.addEventListener("keydown", e=>{ if (e.key==="Escape" && !$("sheet").hidden) openSheet(false); });
-  $("reset").addEventListener("click", ()=>{ $("form").reset(); render(); $("psa").focus(); });
+  $("reset").addEventListener("click", ()=>{ $("form").reset(); touched = false; render(); $("psa").focus(); });
   render();
 }
 init();
