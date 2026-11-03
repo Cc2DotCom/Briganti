@@ -159,7 +159,7 @@ td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabula
       </div>
     </div>
     <div class="item inline" data-m="2019" hidden>
-      <label class="lbl" for="diam">İndeks lezyon çapı</label>
+      <label class="lbl" for="diam">İndeks lezyon çapı<small>En yüksek PI-RADS'lı lezyonun en büyük çapı</small></label>
       <div class="numin"><input id="diam" type="number" inputmode="numeric" min="1" max="80" step="1" placeholder="0"><span>mm</span></div>
     </div>
     <div class="item" data-m="2019" hidden>
@@ -232,6 +232,7 @@ td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabula
       <h3>Girdiler</h3>
       <ul>
         <li>MR evresi: rapordaki en ileri bulguyu seçin; EPE ve SVİ birlikteyse "Seminal vezikül".</li>
+        <li>İndeks lezyon: PI-RADS skoru en yüksek olan lezyon. Eşitse en büyüğü, o da eşitse kapsül dışı yayılım gösteren seçilir. Birden çok lezyonun çapları toplanmaz.</li>
         <li>MR var: kor oranına yalnızca sistematik korlar girer, ISUP ≥2 olanlar sayılır.</li>
         <li>MR yok: herhangi bir derecede kanser içeren tüm korlar sayılır.</li>
       </ul>
@@ -256,7 +257,7 @@ td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabula
    Her değişiklikte version ve reviewed alanlarını güncelleyin.
    ===================================================================== */
 const MODEL_CONFIG = {
-  version: "2.2.0",
+  version: "2.2.1",
   reviewed: "2026-11-03",
   m2019: {
     name: "Briganti 2019",
