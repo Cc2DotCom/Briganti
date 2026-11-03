@@ -41,7 +41,7 @@ button{font:inherit;color:inherit}
 .seg input:focus-visible+span{outline:2px solid var(--accent)}
 .seg.big span{padding:10px 4px;font-size:15px}
 .seg.tall span{white-space:normal;line-height:1.2;padding:8px 4px;font-size:13.5px}
-.seg.grid{display:grid;grid-template-columns:repeat(4,1fr)}
+.isup{align-self:flex-start;font-size:13px;font-weight:600;color:var(--accent);background:var(--field);border-radius:8px;padding:5px 10px}
 .seg.tall em{display:block;font-style:normal;font-weight:500;font-size:11.5px;opacity:.75;margin-top:2px}
 .seg.big{background:var(--surface);border:1px solid var(--line)}
 .seg.big input:checked+span{background:var(--g-idle);color:var(--on-accent);box-shadow:0 4px 12px -4px rgba(47,111,228,.6)}
@@ -150,12 +150,22 @@ td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabula
       <div class="numin"><input id="diam" type="number" inputmode="numeric" min="1" max="80" step="1" placeholder="0"><span>mm</span></div>
     </div>
     <div class="item" id="it-gg" data-m="2019" hidden>
-      <span class="lbl" id="l-gg">Hedefli biyopsi ISUP</span>
-      <div class="seg tall" role="radiogroup" aria-labelledby="l-gg">
-        <label><input type="radio" name="gg" value="2"><span>ISUP 1–2<em>3+3 · 3+4</em></span></label>
-        <label><input type="radio" name="gg" value="3"><span>ISUP 3<em>4+3</em></span></label>
-        <label><input type="radio" name="gg" value="4"><span>ISUP 4–5<em>Gleason 8–10</em></span></label>
+      <span class="lbl" id="l-gg">Hedefli biyopsi Gleason<small>MR-hedefli korlardaki en yüksek skor</small></span>
+      <div class="pair">
+        <div><small>Primer</small>
+          <div class="seg" role="radiogroup" aria-label="Primer Gleason">
+            <label><input type="radio" name="tp" value="3"><span>3</span></label>
+            <label><input type="radio" name="tp" value="4"><span>4</span></label>
+            <label><input type="radio" name="tp" value="5"><span>5</span></label>
+          </div></div>
+        <div><small>Sekonder</small>
+          <div class="seg" role="radiogroup" aria-label="Sekonder Gleason">
+            <label><input type="radio" name="ts" value="3"><span>3</span></label>
+            <label><input type="radio" name="ts" value="4"><span>4</span></label>
+            <label><input type="radio" name="ts" value="5"><span>5</span></label>
+          </div></div>
       </div>
+      <span class="isup" id="tIsup" hidden></span>
     </div>
     <div class="item inline" id="it-c19" data-m="2019" hidden>
       <span class="lbl">Sistematik kor<small>ISUP ≥2 olan / toplam</small></span>
@@ -177,15 +187,21 @@ td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabula
     </div>
     <div class="item" id="it-gl" data-m="2012">
       <span class="lbl" id="l-gl">Biyopsi Gleason<small>En yüksek dereceli kordaki skor</small></span>
-      <div class="seg tall grid" role="radiogroup" aria-labelledby="l-gl">
-        <label><input type="radio" name="gl" value="3,3"><span>3+3<em>ISUP 1</em></span></label>
-        <label><input type="radio" name="gl" value="3,4"><span>3+4<em>ISUP 2</em></span></label>
-        <label><input type="radio" name="gl" value="4,3"><span>4+3<em>ISUP 3</em></span></label>
-        <label><input type="radio" name="gl" value="4,4"><span>4+4<em>ISUP 4</em></span></label>
-        <label><input type="radio" name="gl" value="3,4b"><span>3+5<em>ISUP 4</em></span></label>
-        <label><input type="radio" name="gl" value="4,3b"><span>5+3<em>ISUP 4</em></span></label>
-        <label><input type="radio" name="gl" value="4,4b"><span>9–10<em>ISUP 5</em></span></label>
+      <div class="pair">
+        <div><small>Primer</small>
+          <div class="seg" role="radiogroup" aria-label="Primer Gleason">
+            <label><input type="radio" name="bp" value="3"><span>3</span></label>
+            <label><input type="radio" name="bp" value="4"><span>4</span></label>
+            <label><input type="radio" name="bp" value="5"><span>5</span></label>
+          </div></div>
+        <div><small>Sekonder</small>
+          <div class="seg" role="radiogroup" aria-label="Sekonder Gleason">
+            <label><input type="radio" name="bs" value="3"><span>3</span></label>
+            <label><input type="radio" name="bs" value="4"><span>4</span></label>
+            <label><input type="radio" name="bs" value="5"><span>5</span></label>
+          </div></div>
       </div>
+      <span class="isup" id="bIsup" hidden></span>
     </div>
     <div class="item inline" id="it-c12" data-m="2012">
       <span class="lbl">Pozitif kor<small>kanserli / toplam</small></span>
@@ -241,7 +257,7 @@ td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabula
    Her değişiklikte version ve reviewed alanlarını güncelleyin.
    ===================================================================== */
 const MODEL_CONFIG = {
-  version: "2.3.0",
+  version: "2.4.0",
   reviewed: "2026-11-03",
   m2019: {
     name: "Briganti 2019",
@@ -303,6 +319,15 @@ const radio = n => { const e = document.querySelector(`input[name="${n}"]:checke
 const num = id => { const v = $(id).value.trim(); return v==="" ? null : Number(v); };
 const SCALE = 40;
 
+/* Primer + sekonder Gleason → ISUP derece grubu; seçimi altta gösterir */
+function isup(pre){
+  const p = Number(radio(pre+"p")), q = Number(radio(pre+"s")), el = $(pre+"Isup");
+  if (!p || !q){ el.hidden = true; return null; }
+  const sum = p+q, g = sum<=6 ? 1 : sum===7 ? (p===3 ? 2 : 3) : sum===8 ? 4 : 5;
+  el.hidden = false; el.textContent = `Gleason ${p}+${q} = ${sum} · ISUP ${g}`;
+  return g;
+}
+
 function gather(md){
   const miss = [], bad = [];
   const x = { psa: num("psa") };
@@ -311,12 +336,12 @@ function gather(md){
   if (md==="2019"){
     x.stage = radio("stage"); if (!x.stage) miss.push("MR evresi");
     x.diam = num("diam"); if (x.diam===null) miss.push("lezyon çapı"); else if (!(x.diam>0 && x.diam<=80)) bad.push("Çap 1–80 mm olmalı");
-    const g = radio("gg"); x.gg = g ? Number(g) : null; if (!g) miss.push("ISUP");
+    const g = isup("t"); x.gg = g; if (!g) miss.push("Gleason");
     pos = num("cPos"); tot = num("cTot");
   } else {
     x.cT = radio("cT"); if (!x.cT) miss.push("klinik evre");
-    const gl = radio("gl");
-    if (gl){ x.gp = Number(gl[0]); x.gs = Number(gl[2]); } else { x.gp = x.gs = null; miss.push("Gleason"); }
+    x.gp = radio("bp") ? Number(radio("bp")) : null; x.gs = radio("bs") ? Number(radio("bs")) : null;
+    if (!isup("b")) miss.push("Gleason");
     pos = num("bPos"); tot = num("bTot");
   }
   if (pos===null || tot===null) miss.push("kor sayısı");
@@ -326,12 +351,13 @@ function gather(md){
   return {x, miss, bad};
 }
 
-const ROW = {"PSA":"it-psa","MR evresi":"it-stage","lezyon çapı":"it-diam","ISUP":"it-gg","klinik evre":"it-ct","Gleason":"it-gl"};
+const ROW19 = {"Gleason":"it-gg"};
+const ROW = {"PSA":"it-psa","MR evresi":"it-stage","lezyon çapı":"it-diam","klinik evre":"it-ct","Gleason":"it-gl"};
 let touched = false;
 function markMissing(md, miss){
   document.querySelectorAll(".item.need").forEach(e=>e.classList.remove("need"));
   if (!touched) return;
-  miss.forEach(k=>{ const id = k==="kor sayısı" ? (md==="2019"?"it-c19":"it-c12") : ROW[k]; if (id) $(id).classList.add("need"); });
+  miss.forEach(k=>{ const id = k==="kor sayısı" ? (md==="2019"?"it-c19":"it-c12") : (md==="2019" && ROW19[k]) || ROW[k]; if (id) $(id).classList.add("need"); });
 }
 
 function render(){
