@@ -4,25 +4,21 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
 <style>
 /* Layout: phone-first single column (max 560px); sticky result card on top, settings-style input list below, info sheet behind one button */
+/* Single vivid light look (no dark variant, by design): teal-to-blue sky, result card recolors by risk level */
 :root{
-  --bg:#eef2f3; --surface:#ffffff; --ink:#14232a; --muted:#61727a; --line:#dde4e7; --field:#f3f6f7; --seg-on:#ffffff;
-  --accent:#0f6e7a; --on-accent:#ffffff;
-  --ok:#1d7a4b; --ok-soft:#e1f3e8; --warn:#9a5a0c; --warn-soft:#fcefdc; --bad:#b3261e; --bad-soft:#fbe5e3;
+  --bg:#e8f4f6; --surface:#ffffff; --ink:#10303a; --muted:#5b7680; --line:#d3e6ea; --field:#edf5f7; --seg-on:#0e8a97;
+  --accent:#0e8a97; --accent-2:#2f6fe4; --on-accent:#ffffff;
+  --ok:#14915a; --ok-soft:#dcf5e8; --warn:#d9822b; --warn-soft:#fdeedd; --bad:#e04848; --bad-soft:#fde4e4;
+  --g-idle:linear-gradient(135deg,#0e8a97,#2f6fe4);
+  --g-low:linear-gradient(135deg,#16a36a,#0e8a97);
+  --g-mid:linear-gradient(135deg,#f2a33a,#e86a2c);
+  --g-high:linear-gradient(135deg,#ef5a5a,#c2307a);
   --f-body:"Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --f-mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme:light;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0c1417; --surface:#152227; --ink:#e3ebee; --muted:#93a7af; --line:#26363d; --field:#1c2c32; --seg-on:#34484f;
-  --accent:#4fb8c4; --on-accent:#08262a;
-  --ok:#6fd09d; --ok-soft:#143024; --warn:#f2b66a; --warn-soft:#382812; --bad:#f28c83; --bad-soft:#3b1b19;
-  color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#0c1417; --surface:#152227; --ink:#e3ebee; --muted:#93a7af; --line:#26363d; --field:#1c2c32; --seg-on:#34484f;
-  --accent:#4fb8c4; --on-accent:#08262a;
-  --ok:#6fd09d; --ok-soft:#143024; --warn:#f2b66a; --warn-soft:#382812; --bad:#f28c83; --bad-soft:#3b1b19;
-  color-scheme:dark}
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.4;-webkit-tap-highlight-color:transparent;
+body{background:var(--bg) linear-gradient(180deg,#cdeef0 0,#e8f4f6 280px) no-repeat;color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.4;-webkit-tap-highlight-color:transparent;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px 32px}
 .app{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
 button{font:inherit;color:inherit}
@@ -31,9 +27,9 @@ button{font:inherit;color:inherit}
 /* top bar */
 .top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:4px}
 .brand{display:flex;flex-direction:column;line-height:1.15}
-.brand b{font-size:22px;letter-spacing:-.01em}
+.brand b{font-size:24px;letter-spacing:-.01em;background:var(--g-idle);-webkit-background-clip:text;background-clip:text;color:transparent}
 .brand span{font-size:13px;color:var(--muted)}
-.icon-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;cursor:pointer;flex:none}
+.icon-btn{width:40px;height:40px;border-radius:50%;border:0;background:var(--surface);color:var(--accent);box-shadow:0 2px 8px -3px rgba(16,48,58,.35);display:grid;place-items:center;cursor:pointer;flex:none}
 .icon-btn svg{width:20px;height:20px}
 
 /* segmented control */
@@ -41,32 +37,32 @@ button{font:inherit;color:inherit}
 .seg label{flex:1;position:relative;cursor:pointer}
 .seg input{position:absolute;opacity:0;pointer-events:none}
 .seg span{display:block;text-align:center;padding:8px 4px;border-radius:8px;font-size:14px;font-weight:600;color:var(--muted);white-space:nowrap}
-.seg input:checked+span{background:var(--seg-on);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.seg input:checked+span{background:var(--seg-on);color:var(--on-accent);box-shadow:0 2px 6px -2px rgba(14,138,151,.6)}
 .seg input:focus-visible+span{outline:2px solid var(--accent)}
 .seg.big span{padding:10px 4px;font-size:15px}
-.seg.big input:checked+span{background:var(--accent);color:var(--on-accent);box-shadow:none}
+.seg.big{background:var(--surface);border:1px solid var(--line)}
+.seg.big input:checked+span{background:var(--g-idle);color:var(--on-accent);box-shadow:0 4px 12px -4px rgba(47,111,228,.6)}
 
 /* result card */
-.result{position:sticky;top:calc(env(safe-area-inset-top,0px) + 8px);z-index:4;background:var(--surface);border-radius:16px;padding:16px 18px 14px;
-  border:1px solid var(--line);box-shadow:0 6px 20px -12px rgba(0,0,0,.35);display:flex;flex-direction:column;gap:10px}
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.result{position:sticky;top:calc(env(safe-area-inset-top,0px) + 8px);z-index:4;background:var(--g-idle);color:#fff;border-radius:18px;padding:16px 18px 14px;
+  box-shadow:0 10px 24px -12px rgba(16,48,58,.55);display:flex;flex-direction:column;gap:10px;transition:background .3s}
+.result.low{background:var(--g-low)} .result.mid{background:var(--g-mid)} .result.high{background:var(--g-high)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:#cdeef0}
 .r-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .num{font-family:var(--f-mono);font-weight:600;font-size:44px;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
-.num small{font-size:20px;color:var(--muted);margin-left:2px}
-.pill{border-radius:999px;padding:7px 12px;font-size:14px;font-weight:700;white-space:nowrap;background:var(--field);color:var(--muted)}
-.pill.high{background:var(--bad-soft);color:var(--bad)}
-.pill.mid{background:var(--warn-soft);color:var(--warn)}
-.pill.low{background:var(--ok-soft);color:var(--ok)}
-.bar{position:relative;height:8px;border-radius:4px;background:var(--field)}
-.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--muted);transition:width .25s}
-.bar.high i{background:var(--bad)} .bar.mid i{background:var(--warn)} .bar.low i{background:var(--ok)}
-.bar b{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink)}
-.caption{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--muted)}
-.caption .miss{color:var(--warn)}
+.num small{font-size:20px;opacity:.8;margin-left:2px}
+.pill{border-radius:999px;padding:7px 12px;font-size:14px;font-weight:700;white-space:nowrap;background:rgba(255,255,255,.22);color:#fff}
+.pill.high,.pill.mid,.pill.low{background:#fff}
+.pill.high{color:var(--bad)} .pill.mid{color:var(--warn)} .pill.low{color:var(--ok)}
+.bar{position:relative;height:8px;border-radius:4px;background:rgba(255,255,255,.3)}
+.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:#fff;transition:width .25s}
+.bar b{position:absolute;top:-4px;bottom:-4px;width:2px;background:#fff;opacity:.9}
+.caption{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;color:rgba(255,255,255,.88)}
+.caption .miss{color:#fff;font-weight:600}
 @media (prefers-reduced-motion:reduce){.bar i{transition:none}}
 
 /* input list */
-.list{background:var(--surface);border-radius:16px;border:1px solid var(--line);overflow:hidden}
+.list{background:var(--surface);border-radius:18px;border:0;box-shadow:0 6px 18px -12px rgba(16,48,58,.4);overflow:hidden}
 .item{display:flex;flex-direction:column;gap:8px;padding:12px 16px;border-top:1px solid var(--line)}
 .item:first-child{border-top:0}
 .item.inline{flex-direction:row;align-items:center;justify-content:space-between;gap:12px}
@@ -76,7 +72,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .numin input{font:inherit;font-family:var(--f-mono);font-size:18px;width:72px;border:0;background:transparent;color:var(--ink);padding:9px 0;text-align:right}
 .numin input:focus{outline:none}
 .numin:focus-within{outline:2px solid var(--accent)}
-.numin span{font-size:13px;color:var(--muted)}
+.numin span{font-size:13px;color:var(--accent);font-weight:600}
 .cores{display:flex;align-items:center;gap:8px}
 .cores .numin input{width:44px;text-align:center}
 .cores .of{color:var(--muted);font-size:14px}
@@ -119,7 +115,7 @@ td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabula
     <label><input type="radio" name="mode" id="mNoMri" value="2012"><span>MR yok</span></label>
   </div>
 
-  <section class="result" aria-live="polite">
+  <section class="result" id="result" aria-live="polite">
     <div class="r-row">
       <div class="num" id="riskNum">–<small>%</small></div>
       <div class="pill" id="pill">Değerleri girin</div>
@@ -241,7 +237,7 @@ td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabula
    Her değişiklikte version ve reviewed alanlarını güncelleyin.
    ===================================================================== */
 const MODEL_CONFIG = {
-  version: "2.0.0",
+  version: "2.1.0",
   reviewed: "2026-11-03",
   m2019: {
     name: "Briganti 2019",
@@ -337,7 +333,7 @@ function render(){
   const pill = $("pill"), bar = $("bar");
   if (miss.length || bad.length){
     $("riskNum").innerHTML = "–<small>%</small>";
-    $("fill").style.width = "0"; bar.className = "bar";
+    $("fill").style.width = "0"; bar.className = "bar"; $("result").className = "result";
     pill.className = "pill"; pill.textContent = bad.length ? "Değeri kontrol edin" : "Değerleri girin";
     $("missCap").textContent = bad.length ? bad[0] : (miss.length <= 2 ? "Eksik: " + miss.join(", ") : "");
     $("breakdown").tBodies[0].innerHTML = `<tr><td colspan="4">Değerler girildiğinde görünür.</td></tr>`;
@@ -348,7 +344,7 @@ function render(){
   const lvl = rr >= T ? "high" : rr > T - 2 ? "mid" : "low";
   $("riskNum").innerHTML = `${fmt(r.risk)}<small>%</small>`;
   $("fill").style.width = Math.min(r.risk,SCALE)/SCALE*100 + "%";
-  bar.className = "bar " + lvl;
+  bar.className = "bar " + lvl; $("result").className = "result " + lvl;
   pill.className = "pill " + lvl;
   pill.textContent = lvl==="high" ? "ePLND önerilir" : lvl==="mid" ? "Eşiğe yakın" : "ePLND gerekmez";
   $("missCap").textContent = "";

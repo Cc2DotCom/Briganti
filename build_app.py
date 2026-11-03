@@ -5,7 +5,7 @@ te=s.index('</title>')+len('</title>')
 head='''
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0f6e7a">
+<meta name="theme-color" content="#0e8a97">
 <meta name="description" content="Briganti 2012 ve 2019 nomogramları ile prostat kanserinde lenf nodu invazyonu riski">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png" type="image/png">
