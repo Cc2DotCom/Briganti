@@ -1,7 +1,7 @@
 {
-  "name": "Briganti LNİ Hesaplayıcı",
+  "name": "Briganti ve R.E.N.A.L. Hesaplayıcı",
   "short_name": "Briganti",
-  "description": "Prostat kanserinde lenf nodu invazyonu riski: Briganti 2019 (MR var) ve Briganti 2012 (MR yok).",
+  "description": "Briganti 2012/2019 lenf nodu invazyonu riski ve R.E.N.A.L. nefrometri skoru.",
   "lang": "tr",
   "start_url": "./",
   "scope": "./",

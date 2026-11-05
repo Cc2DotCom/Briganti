@@ -1,11 +1,11 @@
 <!doctype html>
 <html lang="tr">
 <head>
-<title>Briganti LNİ Hesaplayıcı</title>
+<title>Briganti ve RENAL</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0e8a97">
-<meta name="description" content="Briganti 2012 ve 2019 nomogramları ile prostat kanserinde lenf nodu invazyonu riski">
+<meta name="description" content="Briganti 2012 ve 2019 lenf nodu invazyonu riski ve R.E.N.A.L. nefrometri skoru">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png">
@@ -34,6 +34,7 @@ body{margin:0}
   color-scheme:light;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{background:var(--bg) linear-gradient(180deg,#cdeef0 0,#e8f4f6 280px) no-repeat;color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.4;-webkit-tap-highlight-color:transparent;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px 32px}
 .app{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
@@ -104,6 +105,14 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .foot{display:flex;justify-content:center}
 .ghost{background:none;border:0;color:var(--muted);font-size:14px;padding:8px 12px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 
+/* tool tabs */
+.tabs{display:flex;gap:4px;background:rgba(255,255,255,.55);border-radius:14px;padding:4px;box-shadow:inset 0 0 0 1px var(--line)}
+.tabs button{flex:1;border:0;background:none;border-radius:10px;padding:9px 6px;font-weight:700;font-size:15px;color:var(--muted);cursor:pointer;letter-spacing:.01em}
+.tabs button[aria-selected="true"]{background:var(--surface);color:var(--accent);box-shadow:0 3px 10px -5px rgba(16,48,58,.5)}
+.tool{display:flex;flex-direction:column;gap:14px}
+.lbl .pt{float:right;margin-left:8px;font-style:normal;font-family:var(--f-mono);font-size:13px;font-weight:600;color:var(--accent);background:var(--field);border-radius:8px;padding:2px 8px}
+.code{font-family:var(--f-mono);font-weight:600;font-size:15px;background:rgba(255,255,255,.22);border-radius:8px;padding:2px 8px}
+
 /* info sheet */
 .sheet{position:fixed;inset:0;z-index:20;background:rgba(5,12,15,.45);display:flex;align-items:flex-end;justify-content:center}
 .panel{background:var(--surface);width:100%;max-width:560px;max-height:88vh;overflow:auto;border-radius:18px 18px 0 0;
@@ -127,12 +136,18 @@ td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabula
 <body>
 <div class="app">
   <header class="top">
-    <div class="brand"><b>Briganti</b><span>Lenf nodu invazyonu riski</span></div>
+    <div class="brand"><b id="brandT">Briganti</b><span id="brandS">Lenf nodu invazyonu riski</span></div>
     <button class="icon-btn" id="infoBtn" type="button" aria-label="Bilgi ve kaynaklar">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v6"/><circle cx="12" cy="7.5" r=".6" fill="currentColor"/></svg>
     </button>
   </header>
 
+  <nav class="tabs" role="tablist" aria-label="Hesaplayıcı">
+    <button type="button" role="tab" id="tab-briganti" data-tool="briganti" aria-controls="tool-briganti" aria-selected="true">Briganti</button>
+    <button type="button" role="tab" id="tab-renal" data-tool="renal" aria-controls="tool-renal" aria-selected="false">R.E.N.A.L.</button>
+  </nav>
+
+  <div class="tool" id="tool-briganti" role="tabpanel" aria-labelledby="tab-briganti">
   <div class="seg big" role="radiogroup" aria-label="Tanı yolu">
     <label><input type="radio" name="mode" id="mNoMri" value="2012" checked><span>MR yok</span></label>
     <label><input type="radio" name="mode" id="mMri" value="2019"><span>MR var</span></label>
@@ -231,12 +246,74 @@ td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabula
   </form>
 
   <div class="foot"><button type="button" class="ghost" id="reset">Temizle</button></div>
+  </div>
+
+  <!-- R.E.N.A.L. nefrometri skoru -->
+  <div class="tool" id="tool-renal" role="tabpanel" aria-labelledby="tab-renal" hidden>
+  <section class="result" id="rresult" aria-live="polite">
+    <div class="r-row">
+      <div class="num" id="rNum">–<small>/12</small></div>
+      <div class="pill" id="rPill">Değerleri girin</div>
+    </div>
+    <div class="bar"><i id="rFill" style="width:0"></i></div>
+    <div class="caption"><span id="rCap">Puan 4–12</span><span id="rMiss" class="miss"></span></div>
+  </section>
+
+  <form class="list" id="rform" novalidate autocomplete="off">
+    <div class="item inline" id="it-rR">
+      <label class="lbl" for="rDiam">R · Tümör çapı<i class="pt" id="ptR" hidden></i><small>Herhangi bir düzlemdeki en büyük çap</small></label>
+      <div class="numin"><input id="rDiam" type="number" inputmode="decimal" min="0.1" max="30" step="0.1" placeholder="0,0"><span>cm</span></div>
+    </div>
+    <div class="item" id="it-rE">
+      <span class="lbl" id="l-rE">E · Ekzofitik oran<i class="pt" id="ptE" hidden></i></span>
+      <div class="seg tall" role="radiogroup" aria-labelledby="l-rE">
+        <label><input type="radio" name="rE" value="1"><span>≥ %50<em>ekzofitik</em></span></label>
+        <label><input type="radio" name="rE" value="2"><span>&lt; %50<em>ekzofitik</em></span></label>
+        <label><input type="radio" name="rE" value="3"><span>Tamamen<em>endofitik</em></span></label>
+      </div>
+    </div>
+    <div class="item" id="it-rN">
+      <span class="lbl" id="l-rN">N · Toplayıcı sisteme / sinüse uzaklık<i class="pt" id="ptN" hidden></i></span>
+      <div class="seg" role="radiogroup" aria-labelledby="l-rN">
+        <label><input type="radio" name="rN" value="1"><span>≥ 7 mm</span></label>
+        <label><input type="radio" name="rN" value="2"><span>4–7 mm</span></label>
+        <label><input type="radio" name="rN" value="3"><span>≤ 4 mm</span></label>
+      </div>
+    </div>
+    <div class="item" id="it-rA">
+      <span class="lbl" id="l-rA">A · Ön / arka<small>Puan eklemez, harf olarak yazılır</small></span>
+      <div class="seg tall" role="radiogroup" aria-labelledby="l-rA">
+        <label><input type="radio" name="rA" value="a"><span>Anterior<em>a</em></span></label>
+        <label><input type="radio" name="rA" value="p"><span>Posterior<em>p</em></span></label>
+        <label><input type="radio" name="rA" value="x"><span>Belirlenemiyor<em>x</em></span></label>
+      </div>
+    </div>
+    <div class="item" id="it-rL">
+      <span class="lbl" id="l-rL">L · Polar çizgilere göre yerleşim<i class="pt" id="ptL" hidden></i></span>
+      <div class="seg tall" role="radiogroup" aria-labelledby="l-rL">
+        <label><input type="radio" name="rL" value="1"><span>Kutupta<em>tamamen çizginin üstü/altı</em></span></label>
+        <label><input type="radio" name="rL" value="2"><span>Çizgiyi geçiyor<em>polar çizgiyi keser</em></span></label>
+        <label><input type="radio" name="rL" value="3"><span>Orta bölge<em>&gt;%50 geçer, orta hat ya da tamamen arada</em></span></label>
+      </div>
+    </div>
+    <div class="item inline" id="it-rH">
+      <span class="lbl" id="l-rH">Hiler<small>Ana renal arter/ven ile temas (h)</small></span>
+      <div class="seg" role="radiogroup" aria-labelledby="l-rH" style="flex:0 0 150px">
+        <label><input type="radio" name="rH" value="0" checked><span>Hayır</span></label>
+        <label><input type="radio" name="rH" value="1"><span>Evet</span></label>
+      </div>
+    </div>
+  </form>
+
+  <div class="foot"><button type="button" class="ghost" id="rreset">Temizle</button></div>
+  </div>
 </div>
 
 <div class="sheet" id="sheet" hidden>
   <div class="panel" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
     <div class="ph"><h2 id="sheetTitle">Bilgi</h2>
       <button class="icon-btn" id="closeBtn" type="button" aria-label="Kapat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div data-info="briganti" class="tool">
     <div>
       <h3>Hangi model</h3>
       <ul>
@@ -263,6 +340,33 @@ td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabula
       <h3>Kaynaklar</h3>
       <ul id="srcList"></ul>
     </div>
+    </div>
+    <div data-info="renal" class="tool" hidden>
+    <div>
+      <h3>Puanlama</h3>
+      <div class="tbl"><table>
+        <thead><tr><th></th><th>1 puan</th><th>2 puan</th><th>3 puan</th></tr></thead>
+        <tbody>
+          <tr><td><b>R</b> çap</td><td>≤4 cm</td><td>&gt;4 ve &lt;7 cm</td><td>≥7 cm</td></tr>
+          <tr><td><b>E</b> ekzofitik</td><td>≥%50</td><td>&lt;%50</td><td>Tamamen endofitik</td></tr>
+          <tr><td><b>N</b> uzaklık</td><td>≥7 mm</td><td>&gt;4 ve &lt;7 mm</td><td>≤4 mm</td></tr>
+          <tr><td><b>L</b> yerleşim</td><td>Tamamen polar çizginin üstü/altı</td><td>Polar çizgiyi geçiyor</td><td>&gt;%50 çizgiyi geçiyor, aksiyel orta hattı geçiyor ya da tamamen polar çizgiler arasında</td></tr>
+        </tbody></table></div>
+    </div>
+    <div>
+      <h3>Yazım ve yorum</h3>
+      <ul>
+        <li>Toplam R+E+N+L (4–12) yazılır, ardından A harfi (a / p / x) eklenir. Hiler tümörde sona <b>h</b> gelir. Örnek: <b>8ph</b>.</li>
+        <li>N: tümörün toplayıcı sisteme ya da renal sinüse en yakın uzaklığı.</li>
+        <li>L: polar çizgiler, renal sinüs yağının ya da damarların böbrek kutuplarına en yakın girdiği düzlemlerdir.</li>
+        <li>Karmaşıklık: <b>4–6</b> düşük, <b>7–9</b> orta, <b>10–12</b> yüksek.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Kaynak</h3>
+      <ul><li><a href="https://doi.org/10.1016/j.juro.2009.05.035" target="_blank" rel="noopener">Kutikov A, Uzzo RG. The R.E.N.A.L. nephrometry score. J Urol 2009;182(3):844–853</a></li></ul>
+    </div>
+    </div>
     <p class="ver" id="ver"></p>
     <p class="note">Karar destek aracıdır; klinik değerlendirmenin yerini almaz.</p>
   </div>
@@ -274,8 +378,8 @@ td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabula
    Her değişiklikte version ve reviewed alanlarını güncelleyin.
    ===================================================================== */
 const MODEL_CONFIG = {
-  version: "2.4.0",
-  reviewed: "2026-11-03",
+  version: "2.5.0",
+  reviewed: "2026-11-05",
   m2019: {
     name: "Briganti 2019",
     threshold: 7,
@@ -410,14 +514,73 @@ function render(){
     `<tr><td><b>Logit</b></td><td></td><td></td><td class="n"><b>${r.logit.toFixed(3)}</b></td></tr>`;
 }
 
+/* ---------- R.E.N.A.L. nefrometri skoru (Kutikov & Uzzo 2009) ---------- */
+function renalScore(x){
+  const R = x.d<=4 ? 1 : x.d<7 ? 2 : 3;
+  const total = R + x.E + x.N + x.L;
+  return {R, total, code: `${total}${x.A}${x.h ? "h" : ""}`,
+          lvl: total<=6 ? "low" : total<=9 ? "mid" : "high"};
+}
+let rtouched = false;
+function renderRenal(){
+  const miss = [], bad = [];
+  const d = num("rDiam");
+  if (d===null) miss.push(["çap","it-rR"]); else if (!(d>0 && d<=30)) bad.push("Çap 0,1–30 cm olmalı");
+  const pick = (n,lab,id) => { const v = radio(n); if (v===null) miss.push([lab,id]); return v; };
+  const x = { d, E:+pick("rE","E","it-rE"), N:+pick("rN","N","it-rN"), A:pick("rA","A","it-rA"), L:+pick("rL","L","it-rL"), h: radio("rH")==="1" };
+  $("ptR").hidden = !(d>0 && d<=30); if (d>0) $("ptR").textContent = d<=4 ? 1 : d<7 ? 2 : 3;
+  [["ptE","rE"],["ptN","rN"],["ptL","rL"]].forEach(([el,n])=>{ const v = radio(n); $(el).hidden = !v; if (v) $(el).textContent = v; });
+  document.querySelectorAll("#rform .item.need").forEach(e=>e.classList.remove("need"));
+  if (rtouched) miss.forEach(m=>$(m[1]).classList.add("need"));
+  const pill = $("rPill");
+  if (miss.length || bad.length){
+    $("rNum").innerHTML = "–<small>/12</small>"; $("rFill").style.width = "0";
+    $("rresult").className = "result"; pill.className = "pill";
+    pill.textContent = bad.length ? "Değeri kontrol edin" : "Değerleri girin";
+    $("rCap").textContent = "Puan 4–12";
+    $("rMiss").textContent = bad.length ? bad[0] : (rtouched ? "Eksik: " + miss.map(m=>m[0]).join(", ") : "");
+    return;
+  }
+  const s = renalScore(x);
+  $("rNum").innerHTML = `${s.total}<small>/12</small>`;
+  $("rFill").style.width = (s.total-4)/8*100 + "%";
+  $("rresult").className = "result " + s.lvl; pill.className = "pill " + s.lvl;
+  pill.textContent = s.lvl==="low" ? "Düşük karmaşıklık" : s.lvl==="mid" ? "Orta karmaşıklık" : "Yüksek karmaşıklık";
+  $("rCap").innerHTML = `<span class="code">${s.code}</span> &nbsp;R${s.R} E${x.E} N${x.N} L${x.L}`;
+  $("rMiss").textContent = "";
+}
+
+/* ---------- sekmeler ---------- */
+const TOOLS = { briganti:["Briganti","Lenf nodu invazyonu riski"], renal:["R.E.N.A.L.","Nefrometri skoru"] };
+let tool = "briganti";
+function setTool(t, save=true){
+  if (!TOOLS[t]) t = "briganti";
+  tool = t;
+  for (const k in TOOLS){
+    $("tool-"+k).hidden = k!==t;
+    $("tab-"+k).setAttribute("aria-selected", k===t);
+  }
+  document.querySelectorAll("[data-info]").forEach(el => el.hidden = el.dataset.info !== t);
+  $("brandT").textContent = TOOLS[t][0]; $("brandS").textContent = TOOLS[t][1];
+  if (save){ try { localStorage.setItem("tool", t); } catch(e){} }
+}
+
 function openSheet(o){ $("sheet").hidden = !o; (o ? $("closeBtn") : $("infoBtn")).focus(); }
 
 function init(){
   const c = MODEL_CONFIG;
   $("srcList").innerHTML = c.sources.map(s=>`<li><a href="${s.u}" target="_blank" rel="noopener">${s.t}</a></li>`).join("");
   $("ver").textContent = `Sürüm ${c.version} · Son kılavuz kontrolü ${c.reviewed}`;
-  document.addEventListener("input", e=>{ if (e.target.name!=="mode") touched = true; render(); });
-  document.addEventListener("change", render);
+  const route = e => { if ($("rform").contains(e.target)){ if (e.type==="input") rtouched = true; renderRenal(); }
+                      else { if (e.type==="input" && e.target.name!=="mode") touched = true; render(); } };
+  document.addEventListener("input", route);
+  document.addEventListener("change", route);
+  $("rform").addEventListener("submit", e=>e.preventDefault());
+  document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click", ()=>setTool(b.dataset.tool)));
+  $("rreset").addEventListener("click", ()=>{ $("rform").reset(); rtouched = false; renderRenal(); $("rDiam").focus(); });
+  let saved = null; try { saved = localStorage.getItem("tool"); } catch(e){}
+  setTool(location.hash==="#renal" ? "renal" : saved || "briganti", false);
+  renderRenal();
   $("form").addEventListener("submit", e=>e.preventDefault());
   $("infoBtn").addEventListener("click", ()=>openSheet(true));
   $("closeBtn").addEventListener("click", ()=>openSheet(false));

@@ -1,5 +1,5 @@
 // Sürümü her yayında artırın; eski önbellek silinir ve yeni katsayılar yüklenir.
-const CACHE = "briganti-v2.4.0";
+const CACHE = "briganti-v2.5.0";
 const CORE = ["./", "./index.html", "./manifest.webmanifest",
   "./icons/icon-192.png", "./icons/icon-512.png", "./icons/maskable-512.png", "./icons/apple-touch-icon-180.png"];
 
